@@ -3,31 +3,82 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Simple HTML Page</title>
+        <title> Dashboard da MLC </title>
         <style>
+            html {
+                background-color: black;
+            }
+
             body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 20px;
-                background-color: #f4f4f4;
-            }
-            h1 {
-                color: #333;
-            }
-            p {
-                color: #666;
+                height: calc(100vh - 2*var(--margin, 0));
+                display: flex;
+                flex-direction: column;
+                gap: var(--margin, 0);
+                background-color: red;
             }
         </style>
     </head>
     <body>
-        <h1>Welcome to My Simple HTML Page</h1>
-        <p>This is a basic HTML page with some styling.</p>
-        <p>Feel free to modify the content and styles as you wish!</p>
+        <div id="top-div" style="background-color: yellow; flex: 1; display: flex; flex-direction: column; gap: var(--margin);">
+            <div style="background-color: blue; flex: 1;"></div>
+            <div style="background-color: blue; display: flex; align-items: baseline; gap: var(--margin);"></div>
+        </div>
+        <div id="bottom-div" style="background-color: yellow; flex: 1; display: flex; flex-direction: column; gap: var(--margin);">
+            <div style="background-color: blue; display: flex; align-items: baseline; gap: var(--margin);"></div>
+            <div style="background-color: blue; flex: 1; display: flex; flex-direction: column; gap: var(--margin);"></div>
+        </div>
         <script>
-            console.log("This is a simple JavaScript console log message.");
-            document.addEventListener("DOMContentLoaded", function() {
-                alert("Page has loaded successfully!");
+            const margin = () => Math.round(Math.log(Math.max(document.documentElement.clientHeight, document.documentElement.clientWidth) + 1));
+            document.addEventListener("DOMContentLoaded", function () {
+                (setMargin => (setMargin(), window.addEventListener("resize", setMargin)))(() => this.body.style.setProperty('--margin', margin() + 'px'));
             });
+            const topAnchor = document.getElementById('top-div');
+            (date => [...Array(12)].map(() => new Date(date.setMonth(date.getMonth() + 1)).toLocaleString('pt-BR', {
+                month: 'long'
+            }).replace('janeiro', 'jan/' + date.getFullYear() % 100)))((date => (date.setFullYear(date.getFullYear() - 1), date))(new Date())).forEach(month => {
+                topAnchor.querySelectorAll('div')[1].appendChild((div => (Object.assign(div.style, {
+                    backgroundColor: 'green', 
+                    flex: '1', 
+                    textAlign: 'center'
+                }), div))(document.createElement('div'))).appendChild((span => (span.textContent = month, Object.assign(span.style, {
+                    backgroundColor: 'purple', 
+                    textAlign: 'center'
+                }), span))(document.createElement('span')));
+            });
+
+            const anchor = document.getElementById('bottom-div');
+            fetch('/api/v1/deal_pipelines?limit=200&token=62cf25248910300018b5176f').then(res => res.json()).then(json => {
+                if (json) {
+                    const labels = anchor.querySelector('div'), div = anchor.querySelectorAll('div')[1];
+                    json.forEach(pipeline => {
+                        const label = document.createElement('div'); Object.assign(label.style, {backgroundColor: 'green', flex: '1', textAlign: 'center'}), labels.appendChild(label);
+                        const span = document.createElement('span'); span.textContent = pipeline.name; Object.assign(span.style, {backgroundColor: 'purple', textAlign: 'center'}); label.appendChild(span);
+
+                        (innerDiv => (Object.assign(innerDiv.style, {backgroundColor: 'purple', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--margin)'}), div.appendChild(innerDiv)))(document.createElement('div'));
+                    });
+
+                    labels.querySelectorAll('div').forEach((label, i) => {
+                        const span = label.querySelector('span');
+                        const maxWidth = Math.ceil(label.clientWidth);
+                        if (!i || span.getBoundingClientRect().width > label.clientWidth) {
+                            let fontSize = 1;
+                            span.style.fontSize = fontSize + 'px';
+                            while (Math.ceil(span.getBoundingClientRect().width) > maxWidth) (span.style.fontSize = (fontSize /= 2) + 'px')
+                            while (Math.ceil(span.getBoundingClientRect().width) < maxWidth) (span.style.fontSize = (fontSize *= 2) + 'px')
+                            let width, twin = fontSize/2;
+                            while ((width = Math.ceil(span.getBoundingClientRect().width)) !== maxWidth) (span.style.fontSize = (fontSize = (fontSize + ((width > maxWidth)^(twin < fontSize) ? (2*fontSize -twin) : twin))/2) + 'px')
+                            labels.querySelectorAll('span').forEach(span => span.style.fontSize = fontSize + 'px');
+                        }
+                    });
+                }
+            });
+        </script>
+        <script>
+            // const now = new Date(), startDate = new Date(now.getFullYear(), now.getMonth() - 12, 1), endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1), deals = [];
+            // fetch(`/api/v1/deals?limit=200&win=true&closed_at_period=true&start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}&token=62cf25248910300018b5176f`).then(res => res.json()).then(json => {
+            //     deals.push(...json.deals);
+            //     console.log(deals);
+            // });
         </script>
     </body>
 </html>
