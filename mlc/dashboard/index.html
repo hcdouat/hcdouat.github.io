@@ -47,7 +47,7 @@
             });
 
             const anchor = document.getElementById('bottom-div');
-            fetch('/api/v1/deal_pipelines?limit=200&token=62cf25248910300018b5176f').then(res => res.json()).then(json => {
+            fetch('https://crm.rdstation.com/api/v1/deal_pipelines?limit=200&token=62cf25248910300018b5176f').then(res => res.json()).then(json => {
                 if (json) {
                     const labels = anchor.querySelector('div'), div = anchor.querySelectorAll('div')[1];
                     json.forEach(pipeline => {
